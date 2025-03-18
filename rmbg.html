@@ -400,12 +400,36 @@ align-items: center;
       largeImageContainer.style.display = "none";
     });
   
-    downloadBtn.addEventListener("click", function() {
-      const link = document.createElement("a");
-      link.href = largeImage.src;
-      link.download = "image.png";
-      link.click();
-    });
+   <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Save Image as Blob</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+<body>
+    <img id="imageToSave" src="https://cdn.pixabay.com/photo/2013/07/13/13/33/blob-161097_640.png" alt="Image to Save" width="300" />
+    <button onclick="saveImage()">Save Image as Blob</button>
+
+    <script>
+        function saveImage() {
+            var image = document.getElementById("imageToSave");
+            var imageUrl = image.src;  // الحصول على رابط الصورة
+
+            // استخدام Fetch API لتحميل الصورة وتحويلها إلى Blob
+            fetch(imageUrl)
+                .then(response => response.blob())  // تحويل الصورة إلى Blob
+                .then(blob => {
+                    // حفظ الصورة باستخدام FileSaver.js
+                    saveAs(blob, "downloaded_image.jpg");  // تحميل الصورة باسم معين
+                })
+                .catch(error => console.error("Error saving image as Blob:", error));
+        }
+    </script>
+</body>
+</html>
+
   
     sendBtn.addEventListener("click", function() {
      sendBtn.style.display='none'
