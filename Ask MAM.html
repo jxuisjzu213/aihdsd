@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحميل صورة عبر Chrome</title>
+    <title>فتح الصورة في Chrome</title>
     <style>
         body {
             text-align: center;
@@ -24,17 +24,18 @@
 </head>
 <body>
 
-    <h2>اضغط على الصورة لتحميلها عبر Chrome</h2>
+    <h2>اضغط على الصورة لفتحها في Chrome</h2>
     <img id="downloadImage" src="" alt="اضغط للتحميل">
 
     <script>
-        // ضع هنا رابط الصورة المطلوبة
-        document.getElementById("downloadImage").src = "https://iconstore.co/assets/img/author/icons8.png"; // استبدل برابط الصورة
+        let imageUrl = "https://iconstore.co/assets/img/author/icons8.png"; // رابط الصورة
+        document.getElementById("downloadImage").src = imageUrl;
 
         document.addEventListener("click", function (event) {
             if (event.target.tagName === "IMG") {
-                let imageUrl = event.target.src;
-                window.location.href = "intent://" + imageUrl + "#Intent;package=com.android.chrome;end;";
+                let chromeIntent = "intent://" + imageUrl.replace("https://", "") + 
+                                   "#Intent;scheme=https;package=com.android.chrome;end;";
+                window.location.href = chromeIntent;
             }
         });
     </script>
