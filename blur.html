@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title></title>
+  <style>
+    /* Global Styles */
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #101623;
+      margin: 0;
+      padding: 20px;
+      color: rgb(255, 255, 255);
+    }
+
+    /* Headings */
+    h2 {
+      color: #ffffff;
+      margin-bottom: 20px;
+    }
+
+    /* Inputs, Labels, and Buttons */
+    label, button {
+      margin: 10px;
+      font-size: 16px;
+      padding: 8px;
+      border-radius: 5px;
+      outline: none;
+      border: 1px solid white;
+    }
+
+    /* File Input */
+    input[type="file"] {
+      border: 1px solid #403b3b;
+      background-color: #403b3b;
+      color: #403b3b;
+      margin: 10px;
+      font-size: 16px;
+      padding: 8px;
+      border-radius: 5px;
+      outline: none;
+      width: 40%;
+    }
+
+    /* Range Input */
+    input[type="range"] {
+      width: 20%;
+      margin: 10px 0;
+    }
+
+    /* Label Styling */
+    label {
+      font-weight: bold;
+    }
+
+    /* Canvas Styling */
+    canvas {
+      border: 1px solid white;             /* Remove border */
+      cursor: crosshair;
+      background-color: transparent;
+      margin: 20px auto;
+      max-width: 100%;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      background-color: #ddd;
+      width: 200px;
+      height: 200px;
+      max-width:200px;
+    }
+
+    /* Download Button Styling */
+    button {
+      background-color: #403b3b;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      padding: 10px 20px;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background-color: #3f8283;
+    }
+  </style>
+</head>
+<body>
+  <center>
+    <div style="border: 1px solid white; border-radius: 40px; width:70%;">
+      <input type="file" id="upload" accept="image/*">
+      <br>
+      <label for="effectStrength">Power :</label>
+      <input type="range" id="effectStrength" min="1" max="40" value="10">
+      <br><br>
+      <label>
+        <input type="radio" name="effect" value="pixelation" checked> Pixels
+      </label>
+      <label>
+        <input type="radio" name="effect" value="blur"> Blur  
+      </label>
+      <br><br>
+      <label>
+        <input type="radio" name="effect" value="motionBlurExtra"> Motion Blur
+      </label>
+      <br>
+      <canvas id="canvas" onclick="can()"></canvas>
+      <br>
+      <button id="downloadBtn">Download</button>
+
+    </div>
+  </center>
+
+
+  <script>
+    const upload = document.getElementById("upload");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const effectStrengthSlider = document.getElementById("effectStrength");
+    const effectRadios = document.getElementsByName("effect");
+    const downloadBtn = document.getElementById("downloadBtn");
+
+    let image = new Image();
+    let effectStrength = 10; 
+    let effectBox = { x: 50, y: 50, width: 200, height: 200 };
+    let isDragging = false;
+    let isResizing = false;
+    const resizeMargin = 10; 
+    let startX, startY;
+    let isSelected = false; 
+    let resizeDirection = null;
+    let resizeStart = null; // لتخزين بيانات البداية عند تغيير الحجم
+    let currentEffect = "pixelation";
+
+    // تحميل الصورة
+    upload.addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          image.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    image.onload = function () {
+      // تغيير حجم الكانفس ليكون 400x400 كأبعاد ثابتة للتجربة
+      canvas.width = 200;
+      canvas.height = 200;
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+      applyEffect();
+    };
+
+    // دالة تطبيق التأثيرات على الصورة
+    function applyEffect() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // إعادة رسم الصورة الأصلية (المصغرة)
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+      if (currentEffect === "pixelation") {
+        applyPixelation();
+      } else if (currentEffect === "motionBlur") {
+        applyMotionBlur();
+      } else if (currentEffect === "blur") {
+        applyBlur();
+      } else if (currentEffect === "motionBlurExtra") {
+        applyMotionBlurExtra();
+      }
+
+      if (isSelected) drawBorder();
+    }
+
+    // تأثير البيكسلة
+    function applyPixelation() {
+      let imageData = ctx.getImageData(effectBox.x, effectBox.y, effectBox.width, effectBox.height);
+      let pixels = imageData.data;
+      for (let y = 0; y < effectBox.height; y += effectStrength) {
+        for (let x = 0; x < effectBox.width; x += effectStrength) {
+          let i = (y * effectBox.width + x) * 4;
+          let red = pixels[i];
+          let green = pixels[i + 1];
+          let blue = pixels[i + 2];
+          for (let dy = 0; dy < effectStrength; dy++) {
+            for (let dx = 0; dx < effectStrength; dx++) {
+              let ni = ((y + dy) * effectBox.width + (x + dx)) * 4;
+              pixels[ni] = red;
+              pixels[ni + 1] = green;
+              pixels[ni + 2] = blue;
+            }
+          }
+        }
+      }
+      ctx.putImageData(imageData, effectBox.x, effectBox.y);
+    }
+
+    // تأثير التمويه الحركي
+    function applyMotionBlur() {
+      let imageData = ctx.getImageData(effectBox.x, effectBox.y, effectBox.width, effectBox.height);
+      let pixels = imageData.data;
+      let blurAmount = effectStrength * 2;
+      for (let i = 0; i < pixels.length; i += 4) {
+        let shift = blurAmount * 4;
+        if (i + shift < pixels.length) {
+          pixels[i] = (pixels[i] + pixels[i + shift]) / 2;
+          pixels[i + 1] = (pixels[i + 1] + pixels[i + shift + 1]) / 2;
+          pixels[i + 2] = (pixels[i + 2] + pixels[i + shift + 2]) / 2;
+        }
+      }
+      ctx.putImageData(imageData, effectBox.x, effectBox.y);
+    }
+
+    // تأثير البلور باستخدام فلتر الكانفس
+    function applyBlur() {
+      let scale = image.width / canvas.width;
+      let sx = effectBox.x * scale;
+      let sy = effectBox.y * scale;
+      let sWidth = effectBox.width * scale;
+      let sHeight = effectBox.height * scale;
+      
+      ctx.save();
+      ctx.filter = `blur(${effectStrength}px)`;
+      ctx.drawImage(image, sx, sy, sWidth, sHeight, effectBox.x, effectBox.y, effectBox.width, effectBox.height);
+      ctx.restore();
+    }
+
+    // تأثير التمويه الحركي مع زيادة ضبابية البلور (تأثير أكثر رقة)
+    function applyMotionBlurExtra() {
+      // أولاً: تطبيق تأثير التمويه الحركي بشكل خفيف
+      let imageData = ctx.getImageData(effectBox.x, effectBox.y, effectBox.width, effectBox.height);
+      let pixels = imageData.data;
+      let shiftFactor = effectStrength / 4; 
+      let shiftPixels = Math.floor(shiftFactor) * 4;
+      for (let i = 0; i < pixels.length; i += 4) {
+        let shift = shiftPixels;
+        if (i + shift < pixels.length) {
+          pixels[i] = (pixels[i] + pixels[i + shift]) / 2;
+          pixels[i + 1] = (pixels[i + 1] + pixels[i + shift + 1]) / 2;
+          pixels[i + 2] = (pixels[i + 2] + pixels[i + shift + 2]) / 2;
+        }
+      }
+      ctx.putImageData(imageData, effectBox.x, effectBox.y);
+
+      // ثانياً: تطبيق فلتر البلور الإضافي بشكل معتدل
+      let offscreen = document.createElement("canvas");
+      offscreen.width = effectBox.width;
+      offscreen.height = effectBox.height;
+      let offCtx = offscreen.getContext("2d");
+      offCtx.drawImage(canvas, effectBox.x, effectBox.y, effectBox.width, effectBox.height, 0, 0, effectBox.width, effectBox.height);
+      
+      ctx.save();
+      let extraBlurValue = effectStrength / 30; 
+      ctx.filter = `blur(${extraBlurValue}px)`;
+      ctx.drawImage(offscreen, effectBox.x, effectBox.y);
+      ctx.restore();
+    }
+
+    // رسم حدود المربع الأحمر الذي يمثل المنطقة المختارة
+    function drawBorder() {
+      ctx.strokeStyle = "red";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(effectBox.x, effectBox.y, effectBox.width, effectBox.height);
+    }
+
+    // تحديد اتجاه تغيير الحجم بناءً على موقع المؤشر
+    function getResizeDirection(mouseX, mouseY) {
+      let dir = "";
+      if (mouseX >= effectBox.x - resizeMargin && mouseX <= effectBox.x + resizeMargin) {
+        dir += "w";
+      } else if (mouseX >= effectBox.x + effectBox.width - resizeMargin && mouseX <= effectBox.x + effectBox.width + resizeMargin) {
+        dir += "e";
+      }
+      if (mouseY >= effectBox.y - resizeMargin && mouseY <= effectBox.y + resizeMargin) {
+        dir = "n" + dir;
+      } else if (mouseY >= effectBox.y + effectBox.height - resizeMargin && mouseY <= effectBox.y + effectBox.height + resizeMargin) {
+        dir = "s" + dir;
+      }
+      return dir === "" ? null : dir;
+    }
+
+    // دالة للحصول على إحداثيات المؤشر سواء كان من خلال الماوس أو اللمس
+    function getEventPos(e) {
+      if (e.touches) {
+        const rect = canvas.getBoundingClientRect();
+        return {
+          x: e.touches[0].clientX - rect.left,
+          y: e.touches[0].clientY - rect.top
+        };
+      } else {
+        return { x: e.offsetX, y: e.offsetY };
+      }
+    }
+
+    // دوال مشتركة للتعامل مع بداية التحريك/التغيير
+    function startInteraction(e) {
+      e.preventDefault();
+      const pos = getEventPos(e);
+      const mouseX = pos.x;
+      const mouseY = pos.y;
+      isSelected = false;
+      resizeDirection = null;
+      const direction = getResizeDirection(mouseX, mouseY);
+      if (direction) {
+        isResizing = true;
+        resizeDirection = direction;
+        resizeStart = {
+          x: mouseX,
+          y: mouseY,
+          box: { ...effectBox }
+        };
+        isSelected = true;
+      } else if (mouseX > effectBox.x && mouseX < effectBox.x + effectBox.width &&
+                 mouseY > effectBox.y && mouseY < effectBox.y + effectBox.height) {
+        isDragging = true;
+        startX = mouseX - effectBox.x;
+        startY = mouseY - effectBox.y;
+        isSelected = true;
+      }
+      applyEffect();
+    }
+
+    // دوال مشتركة للتعامل مع حركة المؤشر/اللمس
+    function moveInteraction(e) {
+      e.preventDefault();
+      const pos = getEventPos(e);
+      const mouseX = pos.x;
+      const mouseY = pos.y;
+
+      if (isResizing) {
+        const dx = mouseX - resizeStart.x;
+        const dy = mouseY - resizeStart.y;
+        if (resizeDirection.includes("w")) {
+          effectBox.x = resizeStart.box.x + dx;
+          effectBox.width = resizeStart.box.width - dx;
+        }
+        if (resizeDirection.includes("e")) {
+          effectBox.width = resizeStart.box.width + dx;
+        }
+        if (resizeDirection.includes("n")) {
+          effectBox.y = resizeStart.box.y + dy;
+          effectBox.height = resizeStart.box.height - dy;
+        }
+        if (resizeDirection.includes("s")) {
+          effectBox.height = resizeStart.box.height + dy;
+        }
+        if (effectBox.width < 10) effectBox.width = 10;
+        if (effectBox.height < 10) effectBox.height = 10;
+        applyEffect();
+        return;
+      } else if (isDragging) {
+        effectBox.x = mouseX - startX;
+        effectBox.y = mouseY - startY;
+        applyEffect();
+        return;
+      } else {
+        const direction = getResizeDirection(mouseX, mouseY);
+        if (direction) {
+          if (direction === "nw" || direction === "se") {
+            canvas.style.cursor = "nwse-resize";
+          } else if (direction === "ne" || direction === "sw") {
+            canvas.style.cursor = "nesw-resize";
+          } else if (direction === "n" || direction === "s") {
+            canvas.style.cursor = "ns-resize";
+          } else if (direction === "e" || direction === "w") {
+            canvas.style.cursor = "ew-resize";
+          }
+        } else if (mouseX > effectBox.x && mouseX < effectBox.x + effectBox.width &&
+                   mouseY > effectBox.y && mouseY < effectBox.y + effectBox.height) {
+          canvas.style.cursor = "move";
+        } else {
+          canvas.style.cursor = "default";
+        }
+      }
+    }
+
+    // دوال مشتركة لإنهاء التحريك/التغيير
+    function endInteraction(e) {
+      e.preventDefault();
+      isDragging = false;
+      isResizing = false;
+    }
+
+    // إضافة مستمعات الأحداث لكل من الماوس واللمس
+    canvas.addEventListener("mousedown", startInteraction);
+    canvas.addEventListener("mousemove", moveInteraction);
+    canvas.addEventListener("mouseup", endInteraction);
+    canvas.addEventListener("mouseleave", endInteraction);
+
+    canvas.addEventListener("touchstart", startInteraction, { passive: false });
+    canvas.addEventListener("touchmove", moveInteraction, { passive: false });
+    canvas.addEventListener("touchend", endInteraction, { passive: false });
+    canvas.addEventListener("touchcancel", endInteraction, { passive: false });
+
+    effectStrengthSlider.addEventListener("input", (e) => {
+      effectStrength = parseInt(e.target.value);
+      applyEffect();
+    });
+
+    effectRadios.forEach(radio => {
+      radio.addEventListener("change", (e) => {
+        currentEffect = e.target.value;
+        applyEffect();
+      });
+    });
+
+    // زر تحميل الصورة بعد التعديل
+    downloadBtn.addEventListener("click", () => {
+      const imageURL = canvas.toDataURL("image/png");
+      const a = document.createElement("a");
+      a.href = imageURL;
+      a.download = "edited_image.png";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    });
+  </script>
+</body>
+</html>
