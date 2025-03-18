@@ -400,34 +400,21 @@ align-items: center;
       largeImageContainer.style.display = "none";
     });
   
-  downloadBtn.addEventListener("click", function() {
-    const imageUrl = largeImage.src;
-    if (imageUrl.startsWith("blob:")) {
-        // تحويل blob URL إلى data URL
-        fetch(imageUrl)
-          .then(response => response.blob())
-          .then(blob => {
-              const reader = new FileReader();
-              reader.onloadend = function() {
-                  const dataUrl = reader.result;
-                  // هنا لا يمكن استخدام intent مع data URL، لذا نفتح النافذة الجديدة
-                  window.open(dataUrl, '_blank');
-              };
-              reader.readAsDataURL(blob);
-          })
-          .catch(error => console.error("خطأ في تحويل blob:", error));
-    } else {
-        // إذا كان الرابط عام، استخدام intent لفتح الرابط في Chrome
-        try {
-          const urlObj = new URL(imageUrl);
-          const host = urlObj.host;
-          const pathname = urlObj.pathname + urlObj.search;
-          const scheme = urlObj.protocol.replace(':', '');
-          window.location.href = `intent://${host}${pathname}#Intent;scheme=${scheme};package=com.android.chrome;end;`;
-        } catch (error) {
-          console.error("Error parsing URL:", error);
-        }
-    }
+ downloadBtn.addEventListener("click", function() {
+  // إنشاء عنصر canvas وتحديد أبعاده بناءً على حجم الصورة الأصلية
+  const canvas = document.createElement("canvas");
+  canvas.width = largeImage.naturalWidth;
+  canvas.height = largeImage.naturalHeight;
+  
+  // رسم الصورة داخل الـ canvas
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(largeImage, 0, 0, canvas.width, canvas.height);
+  
+  // الحصول على رابط data URL للصورة (صيغة PNG)
+  const screenshotUrl = canvas.toDataURL("image/png");
+  
+  // فتح اللقطة في تبويب جديد (يمكنك تعديل هذا السلوك ليقوم بالتنزيل مثلاً)
+  window.open(screenshotUrl, "_blank");
 });
 
 
