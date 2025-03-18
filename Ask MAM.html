@@ -1,43 +1,53 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>فتح Google Chrome وتحميل صورة</title>
-    <style>
-        body {
-            text-align: center;
-            font-family: Arial, sans-serif;
-            margin: 50px;
-        }
-        button {
-            font-size: 18px;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 5px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>فتح Chrome وتنزيل الصورة</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial, sans-serif;
+      margin: 50px;
+    }
+    button {
+      font-size: 18px;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 5px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
 </head>
 <body>
 
-    <h2>اضغط على الزر لفتح صورة في Google Chrome</h2>
-    <button id="openButton">فتح صورة في Chrome</button>
+  <h2>اضغط على الزر لتنزيل الصورة وفتحها في Google Chrome</h2>
+  <button id="openButton">تنزيل وفتح الصورة</button>
 
-    <script>
-        document.getElementById("openButton").addEventListener("click", function() {
-            // رابط الصورة التي تريد فتحها في المتصفح
-            var imageUrl = "https://iconstore.co/assets/img/author/icons8.png";  // استبدل هذا الرابط برابط الصورة الذي تريده
+  <script>
+    document.getElementById("openButton").addEventListener("click", function() {
+      // رابط الصورة المطلوبة
+      var imageUrl = "https://iconstore.co/assets/img/author/icons8.png"; // استبدل الرابط حسب الحاجة
 
-            // فتح الرابط في Google Chrome باستخدام Intent URL
-            window.location.href = "intent://" + imageUrl + "#Intent;package=com.android.chrome;end;";
-        });
-    </script>
+      // إنشاء عنصر رابط لتنزيل الصورة
+      var a = document.createElement('a');
+      a.href = imageUrl;
+      a.download = "downloaded_image.png"; // اسم الملف عند التنزيل
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      // بعد تأخير بسيط (مثلاً 500 مللي ثانية) فتح تطبيق Chrome باستخدام intent URL
+      setTimeout(function() {
+        window.location.href = "intent://" + imageUrl + "#Intent;package=com.android.chrome;end;";
+      }, 500);
+    });
+  </script>
 
 </body>
 </html>
