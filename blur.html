@@ -369,20 +369,28 @@
     // تعديل حدث زر التحميل لفتح الصورة باستخدام Intent عبر عنصر a
  downloadBtn.addEventListener("click", () => {
   // تحويل محتوى الـ canvas إلى Blob
+ downloadBtn.addEventListener("click", () => {
+  // تحويل محتوى الـ canvas إلى Blob بصيغة PNG
   canvas.toBlob((blob) => {
-    // إنشاء URL من الـ Blob
+    // إنشاء كائن URL من الـ Blob
     const url = URL.createObjectURL(blob);
+    
+    // إنشاء عنصر رابط مؤقت
     const a = document.createElement("a");
+    a.style.display = "none";
     a.href = url;
-    a.download = "edited_image.png"; // اسم الملف عند التحميل
+    a.download = "screenshot.png"; // اسم الملف عند التنزيل
+    
+    // إضافته إلى الصفحة ومحاكاة نقرة عليه
     document.body.appendChild(a);
     a.click();
+    
+    // تنظيف الرابط المؤقت وإزالة العنصر
+    URL.revokeObjectURL(url);
     document.body.removeChild(a);
-    URL.revokeObjectURL(url); // تحرير الذاكرة
   }, "image/png");
 });
 
-});
 
   </script>
 </body>
