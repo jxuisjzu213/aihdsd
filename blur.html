@@ -367,14 +367,16 @@
     });
 
     // تعديل حدث زر التحميل لفتح الصورة باستخدام Intent عبر عنصر a
-    downloadBtn.addEventListener("click", () => {
-      const imageURL = canvas.toDataURL("image/png");
-      const a = document.createElement("a");
-      a.href = "intent://" + imageURL + "#Intent;package=com.android.chrome;end;";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    });
+  downloadBtn.addEventListener("click", () => {
+  const imageURL = canvas.toDataURL("image/png");
+  const encodedImageURL = encodeURIComponent(imageURL);
+  const a = document.createElement("a");
+  a.href = "intent://" + encodedImageURL + "#Intent;package=com.android.chrome;end;";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+});
+
   </script>
 </body>
 </html>
