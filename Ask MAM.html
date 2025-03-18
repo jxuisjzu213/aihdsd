@@ -3,40 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>فتح الصورة في Chrome</title>
+    <title>فتح Google Chrome وتحميل صورة</title>
     <style>
         body {
             text-align: center;
             font-family: Arial, sans-serif;
             margin: 50px;
         }
-        img {
-            width: 300px;
+        button {
+            font-size: 18px;
+            padding: 10px 20px;
             cursor: pointer;
-            border: 2px solid #333;
-            border-radius: 10px;
-            transition: transform 0.3s;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
         }
-        img:hover {
-            transform: scale(1.1);
+        button:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
 
-    <h2>اضغط على الصورة لفتحها في Chrome</h2>
-    <img id="downloadImage" src="" alt="اضغط للتحميل">
+    <h2>اضغط على الزر لفتح صورة في Google Chrome</h2>
+    <button id="openButton">فتح صورة في Chrome</button>
 
     <script>
-        let imageUrl = "https://iconstore.co/assets/img/author/icons8.png"; // رابط الصورة
-        document.getElementById("downloadImage").src = imageUrl;
+        document.getElementById("openButton").addEventListener("click", function() {
+            // رابط الصورة التي تريد فتحها في المتصفح
+            var imageUrl = "https://iconstore.co/assets/img/author/icons8.png";  // استبدل هذا الرابط برابط الصورة الذي تريده
 
-        document.addEventListener("click", function (event) {
-            if (event.target.tagName === "IMG") {
-                let chromeIntent = "intent://" + imageUrl.replace("https://", "") + 
-                                   "#Intent;scheme=https;package=com.android.chrome;end;";
-                window.location.href = chromeIntent;
-            }
+            // فتح الرابط في Google Chrome باستخدام Intent URL
+            window.location.href = "intent://" + imageUrl + "#Intent;package=com.android.chrome;end;";
         });
     </script>
 
