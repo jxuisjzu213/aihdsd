@@ -367,14 +367,21 @@
     });
 
     // تعديل حدث زر التحميل لفتح الصورة باستخدام Intent عبر عنصر a
-  downloadBtn.addEventListener("click", () => {
-  const imageURL = canvas.toDataURL("image/png");
-  const encodedImageURL = encodeURIComponent(imageURL);
-  const a = document.createElement("a");
-  a.href = "intent://" + encodedImageURL + "#Intent;package=com.android.chrome;end;";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+ downloadBtn.addEventListener("click", () => {
+  // تحويل محتوى الـ canvas إلى Blob
+  canvas.toBlob((blob) => {
+    // إنشاء URL من الـ Blob
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "edited_image.png"; // اسم الملف عند التحميل
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url); // تحرير الذاكرة
+  }, "image/png");
+});
+
 });
 
   </script>
