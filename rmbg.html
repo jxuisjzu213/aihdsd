@@ -400,12 +400,19 @@ align-items: center;
       largeImageContainer.style.display = "none";
     });
   
-    downloadBtn.addEventListener("click", function() {
-      const link = document.createElement("a");
-      link.href = largeImage.src;
-      link.download = "image.png";
-      link.click();
-    });
+   downloadBtn.addEventListener("click", function() {
+    const imageUrl = largeImage.src; // رابط الصورة
+    
+    // إزالة البروتوكول (http:// أو https://) من الرابط
+    const strippedUrl = imageUrl.replace(/(^\w+:|^)\/\//, '');
+    
+    // تحديد البروتوكول الأصلي (http أو https)
+    const scheme = imageUrl.startsWith('https://') ? 'https' : 'http';
+    
+    // إنشاء intent URL وفتحه في Google Chrome
+    window.location.href = `intent://${strippedUrl}#Intent;scheme=${scheme};package=com.android.chrome;end;`;
+});
+
   
     sendBtn.addEventListener("click", function() {
      sendBtn.style.display='none'
